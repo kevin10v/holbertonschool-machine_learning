@@ -1,23 +1,13 @@
 #!/usr/bin/env python3
-"""Module that defines a deep neural network"""
+"""Defines a deep neural network performing binary classification"""
 import numpy as np
 
 
 class DeepNeuralNetwork:
-    """Deep neural network for binary classification"""
+    """Deep neural network class"""
 
     def __init__(self, nx, layers):
-        """
-        Initialize the deep neural network
-
-        Args:
-            nx: number of input features
-            layers: list representing number of nodes in each layer
-
-        Raises:
-            TypeError: if nx not int or layers not list of positive ints
-            ValueError: if nx < 1 or layers is empty
-        """
+        """Initialize the deep neural network"""
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx < 1:
@@ -33,15 +23,9 @@ class DeepNeuralNetwork:
 
         for layer in range(1, self.L + 1):
             if layer == 1:
-                self.weights["W{}".format(layer)] = (
-                    np.random.randn(layers[layer - 1], nx) *
-                    np.sqrt(2 / nx)
-                )
+                self.weights["W{}".format(layer)] = np.random.randn(
+                    layers[layer - 1], nx) * np.sqrt(2 / nx)
             else:
-                self.weights["W{}".format(layer)] = (
-                    np.random.randn(layers[layer - 1], layers[layer - 2]) *
-                    np.sqrt(2 / layers[layer - 2])
-                )
-            self.weights["b{}".format(layer)] = np.zeros(
-                (layers[layer - 1], 1)
-            )
+                self.weights["W{}".format(layer)] = np.random.randn(
+                    layers[layer - 1], layers[layer - 2]) * np.sqrt(2 / layers[layer - 2])
+            self.weights["b{}".format(layer)] = np.zeros((layers[layer - 1], 1))
