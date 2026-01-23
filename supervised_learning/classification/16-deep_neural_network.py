@@ -33,13 +33,15 @@ class DeepNeuralNetwork:
 
         for layer in range(1, self.L + 1):
             if layer == 1:
-                self.weights[f'W{layer}'] = (
+                self.weights["W{}".format(layer)] = (
                     np.random.randn(layers[layer - 1], nx) *
                     np.sqrt(2 / nx)
                 )
             else:
-                self.weights[f'W{layer}'] = (
+                self.weights["W{}".format(layer)] = (
                     np.random.randn(layers[layer - 1], layers[layer - 2]) *
                     np.sqrt(2 / layers[layer - 2])
                 )
-            self.weights[f'b{layer}'] = np.zeros((layers[layer - 1], 1))
+            self.weights["b{}".format(layer)] = np.zeros(
+                (layers[layer - 1], 1)
+            )
