@@ -19,11 +19,11 @@ def l2_reg_cost(cost, lambtha, weights, L, m):
         Cost of the network accounting for L2 regularization
     """
     l2_sum = 0
-    
+
     for layer in range(1, L + 1):
         W = weights['W' + str(layer)]
         l2_sum += np.linalg.norm(W) ** 2
-    
+
     l2_cost = cost + (lambtha / (2 * m)) * l2_sum
-    
+
     return l2_cost
