@@ -21,8 +21,8 @@ def specificity(confusion):
     row_sums = np.sum(confusion, axis=1)
     col_sums = np.sum(confusion, axis=0)
     tp = np.diag(confusion)
-    
+
     tn = total - row_sums - col_sums + tp
     fp = col_sums - tp
-    
+
     return tn / (tn + fp)
