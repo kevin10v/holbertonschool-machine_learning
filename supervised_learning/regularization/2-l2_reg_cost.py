@@ -18,10 +18,8 @@ def l2_reg_cost(cost, model):
         accounting for L2 regularization
     """
     costs = []
-    accumulated_cost = cost
 
     for loss in model.losses:
-        accumulated_cost = accumulated_cost + loss
-        costs.append(accumulated_cost)
+        costs.append(cost + loss)
 
     return tf.stack(costs)
