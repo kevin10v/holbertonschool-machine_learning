@@ -79,7 +79,8 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 w_start = j * sw
 
                 # Gradient with respect to A_prev
-                dA_prev_padded[:, h_start:h_start+kh, w_start:w_start+kw, :] += (
+                dA_prev_padded[:, h_start:h_start+kh,
+                               w_start:w_start+kw, :] += (
                     W[:, :, :, k] * dZ[:, i:i+1, j:j+1, k:k+1]
                 )
 
@@ -91,7 +92,7 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                     axis=0
                 )
 
-    # Remove padding from dA_prev  
+    # Remove padding from dA_prev
     if padding == 'valid':
         dA_prev = dA_prev_padded
     else:  # same padding - remove padding
