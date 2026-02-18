@@ -45,8 +45,8 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
 
     # Calculate padding
     if padding == 'same':
-        ph = kh // 2
-        pw = kw // 2
+        ph = max((h_new - 1) * sh + kh - h_prev, 0) // 2
+        pw = max((w_new - 1) * sw + kw - w_prev, 0) // 2
     else:  # valid
         ph, pw = 0, 0
 
