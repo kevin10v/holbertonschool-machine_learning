@@ -39,31 +39,37 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     kh, kw, _, c_new = W.shape
     sh, sw = stride
 
+    # Calculate output dimensions
+    if padding == 'same':
+        h_new = int(np.ceil(h_prev / sh))
+        w_new = int(np.ceil(w_prev / sw))
+    else:  # valid
+        h_new = (h_prev - kh) // sh + 1
+        w_new = (w_prev - kw) // sw + 1
+
     # Calculate padding
     if padding == 'same':
-        # Calculate padding to preserve input dimensions
-        ph = ((h_prev - 1) * sh + kh - h_prev) // 2
-        pw = ((w_prev - 1) * sw + kw - w_prev) // 2
-    else:  # valid
+        # Calculate required padding to support all output positions
+        pad_h_total = max((h_new - 1) * sh + kh - h_prev, 0)
+        pad_w_total = max((w_new - 1) * sw + kw - w_prev, 0)
+        ph = pad_h_total // 2
+        pw = pad_w_total // 2
+        ph_extra = pad_h_total - ph
+        pw_extra = pad_w_total - pw
+    else:
         ph, pw = 0, 0
+        ph_extra, pw_extra = 0, 0
 
-    # Pad the input
-    padded_images = np.pad(
+    # Pad the input (asymmetric if needed)
+    A_prev_padded = np.pad(
         A_prev,
-        ((0, 0), (ph, ph), (pw, pw), (0, 0)),
+        ((0, 0), (ph, ph_extra), (pw, pw_extra), (0, 0)),
         mode='constant',
         constant_values=0
     )
 
-    # Calculate output dimensions based on padded input
-    h_new = (padded_images.shape[1] - kh) // sh + 1
-    w_new = (padded_images.shape[2] - kw) // sw + 1
-
     # Initialize output
     output = np.zeros((m, h_new, w_new, c_new))
-
-    # Assign to standard variable name
-    A_prev_padded = padded_images
 
     # Perform convolution
     for i in range(h_new):

@@ -43,17 +43,23 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     kh, kw, _, _ = W.shape
     sh, sw = stride
 
-    # Calculate padding
+    # Calculate padding to match forward pass
     if padding == 'same':
-        ph = ((h_prev - 1) * sh + kh - h_prev) // 2
-        pw = ((w_prev - 1) * sw + kw - w_prev) // 2
+        # Calculate required padding to support all output positions
+        pad_h_total = max((h_new - 1) * sh + kh - h_prev, 0)
+        pad_w_total = max((w_new - 1) * sw + kw - w_prev, 0)
+        ph = pad_h_total // 2
+        pw = pad_w_total // 2
+        ph_extra = pad_h_total - ph
+        pw_extra = pad_w_total - pw
     else:
         ph, pw = 0, 0
+        ph_extra, pw_extra = 0, 0
 
-    # Pad A_prev
+    # Pad A_prev (asymmetric if needed)
     A_prev_padded = np.pad(
         A_prev,
-        ((0, 0), (ph, ph), (pw, pw), (0, 0)),
+        ((0, 0), (ph, ph_extra), (pw, pw_extra), (0, 0)),
         mode='constant',
         constant_values=0
     )
@@ -85,7 +91,7 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 )
 
     # Remove padding from dA_prev
-    if padding == 'same' and (ph > 0 or pw > 0):
+    if padding == 'same' and (ph > 0 or pw > 0 or ph_extra > 0 or pw_extra > 0):
         dA_prev = dA_prev_padded[:, ph:ph+h_prev, pw:pw+w_prev, :]
     else:
         dA_prev = dA_prev_padded
