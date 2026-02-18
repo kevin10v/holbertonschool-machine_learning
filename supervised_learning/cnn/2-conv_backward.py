@@ -43,20 +43,27 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     kh, kw, _, _ = W.shape
     sh, sw = stride
 
-    # Calculate padding
+    # Calculate padding needed
     if padding == 'same':
-        ph = (kh - 1) // 2
-        pw = (kw - 1) // 2
-        ph_extra = (kh - 1) % 2
-        pw_extra = (kw - 1) % 2
-    else:  # valid
+        # Calculate total padding needed
+        pad_h = max((h_new - 1) * sh + kh - h_prev, 0)
+        pad_w = max((w_new - 1) * sw + kw - w_prev, 0)
+        # Distribute padding
+        ph = pad_h // 2
+        pw = pad_w // 2
+        ph_extra = pad_h - ph
+        pw_extra = pad_w - pw
+    else:
         ph, pw = 0, 0
         ph_extra, pw_extra = 0, 0
 
-    # Pad A_prev (potentially asymmetric for 'same' padding)
-    A_prev_padded = np.pad(A_prev,
-                           ((0, 0), (ph, ph + ph_extra), (pw, pw + pw_extra), (0, 0)),
-                           mode='constant', constant_values=0)
+    # Pad A_prev
+    A_prev_padded = np.pad(
+        A_prev,
+        ((0, 0), (ph, ph_extra), (pw, pw_extra), (0, 0)),
+        mode='constant',
+        constant_values=0
+    )
 
     # Initialize gradients
     dA_prev_padded = np.zeros_like(A_prev_padded)
@@ -85,11 +92,8 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 )
 
     # Remove padding from dA_prev
-    if padding == 'same':
-        if ph_extra == 0 and pw_extra == 0:
-            dA_prev = dA_prev_padded[:, ph:-ph, pw:-pw, :]
-        else:
-            dA_prev = dA_prev_padded[:, ph:h_prev+ph, pw:w_prev+pw, :]
+    if padding == 'same' and (ph > 0 or ph_extra > 0 or pw > 0 or pw_extra > 0):
+        dA_prev = dA_prev_padded[:, ph:ph+h_prev, pw:pw+w_prev, :]
     else:
         dA_prev = dA_prev_padded
 
