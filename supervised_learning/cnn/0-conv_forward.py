@@ -41,8 +41,8 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
 
     # Calculate padding
     if padding == 'same':
-        ph = ((h_prev - 1) * sh + kh - h_prev) // 2 + 1
-        pw = ((w_prev - 1) * sw + kw - w_prev) // 2 + 1
+        ph = kh // 2
+        pw = kw // 2
     else:  # valid
         ph, pw = 0, 0
 
