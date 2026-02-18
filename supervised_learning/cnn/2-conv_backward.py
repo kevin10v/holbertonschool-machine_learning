@@ -45,17 +45,21 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
 
     # Calculate padding
     if padding == 'same':
-        ph = max((h_new - 1) * sh + kh - h_prev, 0) // 2
-        pw = max((w_new - 1) * sw + kw - w_prev, 0) // 2
+        ph = (kh - 1) // 2
+        pw = (kw - 1) // 2
+        ph_extra = (kh - 1) % 2
+        pw_extra = (kw - 1) % 2
     else:  # valid
         ph, pw = 0, 0
+        ph_extra, pw_extra = 0, 0
 
-    # Pad A_prev
-    A_prev_padded = np.pad(A_prev, ((0, 0), (ph, ph), (pw, pw), (0, 0)),
+    # Pad A_prev (potentially asymmetric for 'same' padding)
+    A_prev_padded = np.pad(A_prev,
+                           ((0, 0), (ph, ph + ph_extra), (pw, pw + pw_extra), (0, 0)),
                            mode='constant', constant_values=0)
 
     # Initialize gradients
-    dA_prev = np.zeros_like(A_prev_padded)
+    dA_prev_padded = np.zeros_like(A_prev_padded)
     dW = np.zeros_like(W)
     db = np.sum(dZ, axis=(0, 1, 2), keepdims=True)
 
@@ -68,7 +72,7 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 w_start = j * sw
 
                 # Gradient with respect to A_prev
-                dA_prev[:, h_start:h_start+kh, w_start:w_start+kw, :] += (
+                dA_prev_padded[:, h_start:h_start+kh, w_start:w_start+kw, :] += (
                     W[:, :, :, k] * dZ[:, i:i+1, j:j+1, k:k+1]
                 )
 
@@ -82,8 +86,11 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
 
     # Remove padding from dA_prev
     if padding == 'same':
-        dA_prev = dA_prev[:, ph:-ph, pw:-pw, :]
+        if ph_extra == 0 and pw_extra == 0:
+            dA_prev = dA_prev_padded[:, ph:-ph, pw:-pw, :]
+        else:
+            dA_prev = dA_prev_padded[:, ph:h_prev+ph, pw:w_prev+pw, :]
     else:
-        dA_prev = dA_prev
+        dA_prev = dA_prev_padded
 
     return dA_prev, dW, db

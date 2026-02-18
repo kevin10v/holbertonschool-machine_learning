@@ -39,20 +39,25 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     kh, kw, _, c_new = W.shape
     sh, sw = stride
 
-    # Calculate padding and output dimensions
+    # Calculate padding
     if padding == 'same':
-        h_new = int(np.ceil(h_prev / sh))
-        w_new = int(np.ceil(w_prev / sw))
-        ph = max((h_new - 1) * sh + kh - h_prev, 0) // 2
-        pw = max((w_new - 1) * sw + kw - w_prev, 0) // 2
+        ph = (kh - 1) // 2
+        pw = (kw - 1) // 2
+        # For odd kernel sizes, we may need additional padding on right/bottom
+        ph_extra = (kh - 1) % 2
+        pw_extra = (kw - 1) % 2
     else:  # valid
         ph, pw = 0, 0
-        h_new = (h_prev - kh) // sh + 1
-        w_new = (w_prev - kw) // sw + 1
+        ph_extra, pw_extra = 0, 0
 
-    # Pad the input
-    A_prev_padded = np.pad(A_prev, ((0, 0), (ph, ph), (pw, pw), (0, 0)),
+    # Pad the input (potentially asymmetric for 'same' padding)
+    A_prev_padded = np.pad(A_prev,
+                           ((0, 0), (ph, ph + ph_extra), (pw, pw + pw_extra), (0, 0)),
                            mode='constant', constant_values=0)
+
+    # Calculate output dimensions
+    h_new = (A_prev_padded.shape[1] - kh) // sh + 1
+    w_new = (A_prev_padded.shape[2] - kw) // sw + 1
 
     # Initialize output
     output = np.zeros((m, h_new, w_new, c_new))
