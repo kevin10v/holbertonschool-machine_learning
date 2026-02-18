@@ -48,8 +48,9 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
         # Calculate required padding to support all output positions
         pad_h_total = max((h_new - 1) * sh + kh - h_prev, 0)
         pad_w_total = max((w_new - 1) * sw + kw - w_prev, 0)
-        ph = pad_h_total // 2
-        pw = pad_w_total // 2
+        # Distribute padding - put more on top/left
+        ph = (pad_h_total + 1) // 2
+        pw = (pad_w_total + 1) // 2
         ph_extra = pad_h_total - ph
         pw_extra = pad_w_total - pw
     else:
