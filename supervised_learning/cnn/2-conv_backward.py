@@ -90,10 +90,13 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                     axis=0
                 )
 
-    # Remove padding from dA_prev
-    if padding == 'same' and (ph > 0 or pw > 0 or ph_extra > 0 or pw_extra > 0):
-        dA_prev = dA_prev_padded[:, ph:ph+h_prev, pw:pw+w_prev, :]
-    else:
+    # Remove padding from dA_prev  
+    if padding == 'valid':
         dA_prev = dA_prev_padded
+    else:  # same padding - remove padding
+        if ph > 0 or pw > 0 or ph_extra > 0 or pw_extra > 0:
+            dA_prev = dA_prev_padded[:, ph:ph+h_prev, pw:pw+w_prev, :]
+        else:
+            dA_prev = dA_prev_padded
 
     return dA_prev, dW, db
