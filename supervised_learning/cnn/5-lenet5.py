@@ -30,7 +30,7 @@ def lenet5(X):
 
     # Max pooling layer with kernels of shape 2x2 with 2x2 strides
     pool1 = K.layers.MaxPooling2D(pool_size=(2, 2),
-                                   strides=(2, 2))(conv1)
+                                  strides=(2, 2))(conv1)
 
     # Convolutional layer with 16 kernels of shape 5x5 with valid padding
     conv2 = K.layers.Conv2D(filters=16,
@@ -41,7 +41,7 @@ def lenet5(X):
 
     # Max pooling layer with kernels of shape 2x2 with 2x2 strides
     pool2 = K.layers.MaxPooling2D(pool_size=(2, 2),
-                                   strides=(2, 2))(conv2)
+                                  strides=(2, 2))(conv2)
 
     # Flatten the output
     flatten = K.layers.Flatten()(pool2)
