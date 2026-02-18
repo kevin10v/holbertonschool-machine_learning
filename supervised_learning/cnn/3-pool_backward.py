@@ -59,13 +59,13 @@ def pool_backward(dA, A_prev, kernel_shape, stride=(1, 1), mode='max'):
                     mask = (region == max_val).astype(float)
                     # Distribute gradient to the max position
                     dA_prev[:, h_start:h_start+kh, w_start:w_start+kw, k] += (
-                        mask * dA[:, i:i+1, j:j+1, k:k+1]
+                        mask * dA[:, i, j, k].reshape(-1, 1, 1)
                     )
                 elif mode == 'avg':
                     # Distribute gradient equally for average pooling
-                    avg_gradient = dA[:, i:i+1, j:j+1, k:k+1] / (kh * kw)
+                    avg_gradient = dA[:, i, j, k] / (kh * kw)
                     dA_prev[:, h_start:h_start+kh, w_start:w_start+kw, k] += (
-                        np.ones((kh, kw)) * avg_gradient
+                        avg_gradient.reshape(-1, 1, 1)
                     )
 
     return dA_prev
