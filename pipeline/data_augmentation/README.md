@@ -144,3 +144,4 @@ Each file can be tested with its corresponding main file:
 
 ## Author
 Holberton School Machine Learning Project
+Kevin Voka
