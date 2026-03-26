@@ -224,16 +224,16 @@ class Yolo:
 
         for image in images:
             image_shapes.append(image.shape[:2])
-            # INTER_CUBIC on uint8 rounds to integers (~2/255 pixel error vs.
-            # reference). Normalize to float first, then resize.
-            img = image.astype(np.float32) / 255.0
+            # Resize float32 in [0, 255] then scale — avoids uint8 rounding.
+            # (cv2.resize on uint8 clips bicubic samples to integers.)
             resized = cv2.resize(
-                img, (input_w, input_h),
+                image.astype(np.float32),
+                (input_w, input_h),
                 interpolation=cv2.INTER_CUBIC
-            )
+            ) / 255.0
             pimages.append(resized)
 
-        pimages = np.array(pimages, dtype=np.float32)
+        pimages = np.asarray(pimages, dtype=np.float64)
         image_shapes = np.array(image_shapes)
 
         return pimages, image_shapes
